@@ -3,28 +3,38 @@ import { customElement, state } from 'lit/decorators.js';
 import styles from './main-app.css?inline';
 import '../pages/page-viewmac/page-viewmac';
 import '../pages/pager-registmac/pager-registmac';
+import RegistMacScript from '../pages/pager-registmac/RegistMacScript';
 
 @customElement('main-app')
 export class MainApp extends LitElement {
   @state()
   private currentPage: 'home' | 'register' | 'view' = 'home';
 
+  @state()
+  private isAppLoading: boolean = true;
+
   async connectedCallback() {
     super.connectedCallback();
     try {
-      console.log('🔄 Probando conexión oculta a la API de Vercel/NeonDB (/api/geomac)...');
-      const response = await fetch('/api/geomac');
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log('✅ Conexión a la DB exitosa. Datos iniciales recibidos:', data);
+      console.log('🔄 Cargando datos desde NeonDB (/api/geomac)...');
+      await RegistMacScript.fetchInitialData();
+      console.log('✅ Base de datos cargada correctamente.');
     } catch (error) {
-      console.error('❌ Falló la prueba de conexión a la API:', error);
+      console.error('❌ Error al cargar datos de NeonDB:', error);
+    } finally {
+      this.isAppLoading = false;
     }
   }
 
   render(): TemplateResult {
+    if (this.isAppLoading) {
+        return html`
+            <div class="app-container" style="display:flex; justify-content:center; align-items:center; height:100vh;">
+                <div class="spinner"></div>
+            </div>
+        `;
+    }
+
     return html`
       <div class="app-container">
         <header class="app-header glass-panel">

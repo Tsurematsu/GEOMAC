@@ -47,7 +47,7 @@ export class PagerRegistmac extends LitElement {
     this.successMsg = null;
     try {
       const loc = await RegistMacScript.getGPS_point();
-      const newPt = RegistMacScript.addGPSPoint(loc);
+      const newPt = await RegistMacScript.addGPSPoint(loc);
       this.refreshPoints();
       this.selectPoint(newPt.id); // Auto-select and open modal
     } catch (err: any) {
@@ -70,14 +70,18 @@ export class PagerRegistmac extends LitElement {
     this.editingNameValue = currentName;
   }
 
-  private savePointName() {
+  private async savePointName() {
     if (!this.selectedPointId || !this.editingNameValue.trim()) {
         this.isEditingName = false;
         return;
     }
-    RegistMacScript.renameGPSPoint(this.selectedPointId, this.editingNameValue.trim());
-    this.isEditingName = false;
-    this.refreshPoints();
+    try {
+        await RegistMacScript.renameGPSPoint(this.selectedPointId, this.editingNameValue.trim());
+        this.isEditingName = false;
+        this.refreshPoints();
+    } catch(e: any) {
+        this.errorMsg = e.message;
+    }
   }
 
   private refreshMacs() {
@@ -93,28 +97,40 @@ export class PagerRegistmac extends LitElement {
     this.macInput = target.value;
   }
 
-  private registerMac() {
+  private async registerMac() {
     if (!this.macInput.trim() || !this.selectedPointId) return;
     
-    RegistMacScript.registerMacToPoint(this.macInput.trim(), this.selectedPointId);
-    this.successMsg = `MAC añadida exitosamente.`;
-    this.macInput = '';
-    this.refreshMacs();
-  }
-
-  private removeMac(mac: string) {
-    if (!this.selectedPointId) return;
-    RegistMacScript.removeMacFromPoint(mac, this.selectedPointId);
-    this.refreshMacs();
-  }
-
-  private removePoint(id: string, e: Event) {
-    e.stopPropagation(); // Prevent opening the modal
-    RegistMacScript.removeGPSPoint(id);
-    if (this.selectedPointId === id) {
-        this.selectedPointId = null;
+    try {
+        await RegistMacScript.registerMacToPoint(this.macInput.trim(), this.selectedPointId);
+        this.successMsg = `MAC añadida exitosamente.`;
+        this.macInput = '';
+        this.refreshMacs();
+    } catch(e: any) {
+        this.errorMsg = e.message;
     }
-    this.refreshPoints();
+  }
+
+  private async removeMac(mac: string) {
+    if (!this.selectedPointId) return;
+    try {
+        await RegistMacScript.removeMacFromPoint(mac, this.selectedPointId);
+        this.refreshMacs();
+    } catch(e: any) {
+        this.errorMsg = e.message;
+    }
+  }
+
+  private async removePoint(id: string, e: Event) {
+    e.stopPropagation(); // Prevent opening the modal
+    try {
+        await RegistMacScript.removeGPSPoint(id);
+        if (this.selectedPointId === id) {
+            this.selectedPointId = null;
+        }
+        this.refreshPoints();
+    } catch(e: any) {
+        this.errorMsg = e.message;
+    }
   }
 
   render(): TemplateResult {

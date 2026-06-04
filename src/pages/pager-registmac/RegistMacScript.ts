@@ -10,12 +10,28 @@ export interface LocationData {
 export interface PuntoGPS {
     lat: number;
     lng: number;
-    alt: number;
+    alt?: number;
     name: string;
     id: string;
 }
 
 export default class RegistMacScript {
+    public static async fetchInitialData() {
+        try {
+            const res = await fetch('/api/geomac');
+            if (res.ok) {
+                const data = await res.json();
+                globalVar.puntosGPS = data.puntosGPS || [];
+                globalVar.macs = data.macs || [];
+                globalVar.associations = data.associations || [];
+                if (data.radiusDistance) {
+                    globalVar.radiusDistance = data.radiusDistance;
+                }
+            }
+        } catch (e) {
+            console.error('Failed to fetch initial data:', e);
+        }
+    }
     constructor(){
         console.log('RegistMacScript initialized');
     }
@@ -76,7 +92,7 @@ export default class RegistMacScript {
         return globalVar.puntosGPS;
     }
 
-    public static addGPSPoint(location: LocationData): PuntoGPS {
+    public static async addGPSPoint(location: LocationData): Promise<PuntoGPS> {
         const pointId = `PT-${Date.now()}`;
         const newPoint = {
             lat: location.lat,
@@ -86,11 +102,27 @@ export default class RegistMacScript {
             id: pointId
         };
         
+        const res = await fetch('/api/geomac', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'addPunto', data: newPoint })
+        });
+        
+        if (!res.ok) throw new Error('Error al guardar en la base de datos');
+
         globalVar.puntosGPS.push(newPoint);
         return newPoint;
     }
 
-    public static removeGPSPoint(pointId: string) {
+    public static async removeGPSPoint(pointId: string) {
+        const res = await fetch('/api/geomac', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'removePunto', id: pointId })
+        });
+        
+        if (!res.ok) throw new Error('Error al borrar en la base de datos');
+
         // Remove point
         const ptIndex = globalVar.puntosGPS.findIndex(p => p.id === pointId);
         if (ptIndex !== -1) {
@@ -101,25 +133,36 @@ export default class RegistMacScript {
         globalVar.associations = globalVar.associations.filter(a => a.puntoId !== pointId);
     }
 
-    public static renameGPSPoint(pointId: string, newName: string) {
+    public static async renameGPSPoint(pointId: string, newName: string) {
+        const res = await fetch('/api/geomac', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'renamePunto', id: pointId, name: newName })
+        });
+
+        if (!res.ok) throw new Error('Error al renombrar en la base de datos');
+
         const pt = globalVar.puntosGPS.find(p => p.id === pointId);
         if (pt) {
             pt.name = newName;
         }
     }
 
-    public static registerMacToPoint(mac: string, pointId: string) {
+    public static async registerMacToPoint(mac: string, pointId: string) {
+        const res = await fetch('/api/geomac', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'addMacAssociation', mac, puntoId: pointId })
+        });
+        
+        if (!res.ok) throw new Error('Error al guardar MAC en la base de datos');
+
         if (!globalVar.macs.includes(mac)) {
             globalVar.macs.push(mac);
         }
-
-        // Avoid duplicate association
-        const existing = globalVar.associations.find(a => a.mac === mac && a.puntoId === pointId);
-        if (!existing) {
-            globalVar.associations.push({
-                mac: mac,
-                puntoId: pointId
-            });
+        const existingAssoc = globalVar.associations.find(a => a.mac === mac && a.puntoId === pointId);
+        if (!existingAssoc) {
+            globalVar.associations.push({ mac, puntoId: pointId });
         }
     }
 
@@ -129,7 +172,15 @@ export default class RegistMacScript {
             .map(a => a.mac);
     }
 
-    public static removeMacFromPoint(mac: string, pointId: string) {
+    public static async removeMacFromPoint(mac: string, pointId: string) {
+        const res = await fetch('/api/geomac', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'removeMacAssociation', mac, puntoId: pointId })
+        });
+
+        if (!res.ok) throw new Error('Error al borrar MAC de la base de datos');
+
         const index = globalVar.associations.findIndex(a => a.mac === mac && a.puntoId === pointId);
         if (index !== -1) {
             globalVar.associations.splice(index, 1);
