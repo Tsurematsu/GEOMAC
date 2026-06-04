@@ -85,11 +85,23 @@ export class MainApp extends LitElement {
   }
 
   private handleQrScanned(e: CustomEvent) {
-    const token = e.detail.token;
-    if (token) {
-        // Redirigir la ventana forzosamente inyectando la llave en la URL
-        window.location.href = '/?share-key=' + encodeURIComponent(token);
+    let token = e.detail.token;
+    if (!token) return;
+
+    try {
+        // Si el QR contiene la URL completa (ej. https://.../?share-key=ABC)
+        // extraemos solo la llave para mantenernos en el dominio actual (útil para localhost)
+        const urlObj = new URL(token);
+        const extractedKey = urlObj.searchParams.get('share-key');
+        if (extractedKey) {
+            token = extractedKey;
+        }
+    } catch (err) {
+        // Si falla el parseo de URL, asumimos que el QR era solo el token de texto plano
     }
+
+    // Redirigir inyectando la llave en la URL actual
+    window.location.href = '/?share-key=' + encodeURIComponent(token);
   }
 
   private renderUnauthorized(): TemplateResult {
