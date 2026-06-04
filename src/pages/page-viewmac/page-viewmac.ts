@@ -54,14 +54,14 @@ export class PageViewmac extends LitElement {
 
   private applySelectedMac() {
     if (!this.selectedMacToApply) return;
-    
+
     mqttClient.publicarMensaje({ macAddress: this.selectedMacToApply.mac });
-    
+
     // Cerramos el modal
     this.selectedMacToApply = null;
-    
+
     // Opcional: mostrar un pequeño feedback
-    alert("¡Instrucción MQTT enviada! Revisa el escritorio.");
+    // alert("¡Instrucción MQTT enviada! Revisa el escritorio.");
   }
 
   render(): TemplateResult {
