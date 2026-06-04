@@ -112,8 +112,9 @@ export class PageViewmac extends LitElement {
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg>
                 </div>
                 <div class="mac-details">
+                  <span class="mac-name-tag" style="font-size: 14px; font-weight: bold; color: var(--accent); margin-bottom: 4px; display: block;">${item.macName}</span>
                   <span class="mac-address">${item.mac}</span>
-                  <span class="punto-name">${item.puntoName} • A ${Math.round(item.distance)}m de ti</span>
+                  <span class="punto-name">${item.pointName} • A ${Math.round(item.distance)}m de ti</span>
                 </div>
               </div>
             `)}

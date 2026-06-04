@@ -8,7 +8,7 @@ export interface PuntoGPSData {
 
 interface GlobalVarType {
     puntosGPS: PuntoGPSData[];
-    macs: string[];
+    macs: { mac: string; name: string }[];
     associations: { mac: string; puntoId: string }[];
     radiusDistance: number;
 }

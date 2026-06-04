@@ -25,13 +25,16 @@ export class PagerRegistmac extends LitElement {
   private successMsg: string | null = null;
 
   @state()
-  private associatedMacs: string[] = [];
+  private associatedMacs: {mac: string, name: string}[] = [];
 
   @state()
   private isEditingName: boolean = false;
 
   @state()
   private editingNameValue: string = '';
+
+  @state()
+  private macNameInput: string = '';
 
   connectedCallback() {
     super.connectedCallback();
@@ -62,6 +65,7 @@ export class PagerRegistmac extends LitElement {
     this.selectedPointId = id;
     this.successMsg = null;
     this.macInput = '';
+    this.macNameInput = '';
     this.isEditingName = false;
     this.refreshMacs();
   }
@@ -95,8 +99,11 @@ export class PagerRegistmac extends LitElement {
 
   private handleMacScanned(e: CustomEvent) {
     this.macInput = e.detail.mac;
-    // Auto-register upon successful scan for better UX
-    this.registerMac();
+    // Poner el foco en el input del nombre de la MAC para que el usuario escriba el tag
+    setTimeout(() => {
+        const nameInput = this.renderRoot.querySelector('.mac-name-input') as HTMLInputElement;
+        if (nameInput) nameInput.focus();
+    }, 50);
   }
 
   private handleMacInput(e: Event) {
@@ -108,9 +115,10 @@ export class PagerRegistmac extends LitElement {
     if (!this.macInput.trim() || !this.selectedPointId) return;
     
     try {
-        await RegistMacScript.registerMacToPoint(this.macInput.trim(), this.selectedPointId);
+        await RegistMacScript.registerMacToPoint(this.macInput.trim(), this.macNameInput, this.selectedPointId);
         this.successMsg = `MAC añadida exitosamente.`;
         this.macInput = '';
+        this.macNameInput = '';
         this.refreshMacs();
     } catch(e: any) {
         this.errorMsg = e.message;
@@ -227,14 +235,23 @@ export class PagerRegistmac extends LitElement {
               </div>
               
               <div class="modal-body">
-                  <div class="input-group">
+                  <div class="input-group" style="flex-wrap: wrap;">
                     <mac-scanner @mac-scanned=${this.handleMacScanned}></mac-scanner>
                     <input 
                       type="text" 
-                      placeholder="Ej. 00:1B:44:11:3A:B7" 
+                      placeholder="MAC (Ej. 00:1B:44...)" 
                       .value=${this.macInput}
                       @input=${this.handleMacInput}
+                      style="flex: 2; min-width: 140px;"
+                    />
+                    <input 
+                      type="text"
+                      class="mac-name-input"
+                      placeholder="Tag (Ej. Router)"
+                      .value=${this.macNameInput}
+                      @input=${(e: Event) => this.macNameInput = (e.target as HTMLInputElement).value}
                       @keydown=${(e: KeyboardEvent) => e.key === 'Enter' && this.registerMac()}
+                      style="flex: 1; min-width: 100px;"
                     />
                     <button class="btn btn-primary" @click=${this.registerMac} ?disabled=${!this.macInput.trim()}>
                       Añadir
@@ -254,10 +271,13 @@ export class PagerRegistmac extends LitElement {
                         <p class="empty-macs">No hay MACs registradas para este punto.</p>
                     ` : html`
                         <ul class="macs-list">
-                            ${this.associatedMacs.map(mac => html`
+                            ${this.associatedMacs.map(macItem => html`
                                 <li class="mac-list-item fade-in">
-                                    <span class="mac-address">${mac}</span>
-                                    <button class="btn-delete" @click=${() => this.removeMac(mac)}>
+                                    <div style="display:flex; flex-direction:column; gap:2px;">
+                                        <span style="font-size: 12px; color: var(--accent); font-weight: bold;">${macItem.name}</span>
+                                        <span class="mac-address">${macItem.mac}</span>
+                                    </div>
+                                    <button class="btn-delete" @click=${() => this.removeMac(macItem.mac)}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                     </button>
                                 </li>

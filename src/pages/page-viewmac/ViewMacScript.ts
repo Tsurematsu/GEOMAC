@@ -2,8 +2,9 @@ import globalVar from '../../modulos/globalVar';
 
 export interface NearbyMac {
     mac: string;
+    macName: string;
+    pointName: string;
     distance: number;
-    puntoName: string;
 }
 
 export default class ViewMacScript {
@@ -35,19 +36,20 @@ export default class ViewMacScript {
 
     const nearbyPointIds = nearbyPoints.map(pt => pt.id);
 
-    const nearbyAssociations = globalVar.associations.filter(assoc => 
-        nearbyPointIds.includes(assoc.puntoId)
-    );
+    const nearbyMacs: NearbyMac[] = [];
+    for (const assoc of globalVar.associations) {
+        if (nearbyPointIds.includes(assoc.puntoId)) {
+            const point = nearbyPoints.find(pt => pt.id === assoc.puntoId)!;
+            const macObj = globalVar.macs.find(m => m.mac === assoc.mac);
+            nearbyMacs.push({
+                mac: assoc.mac,
+                macName: macObj ? macObj.name : 'Desconocido',
+                pointName: point.name,
+                distance: point.distance
+            });
+        }
+    }
 
-    const results: NearbyMac[] = nearbyAssociations.map(assoc => {
-        const point = nearbyPoints.find(pt => pt.id === assoc.puntoId)!;
-        return {
-            mac: assoc.mac,
-            distance: point.distance,
-            puntoName: point.name
-        };
-    });
-
-    return results.sort((a, b) => a.distance - b.distance);
+    return nearbyMacs.sort((a, b) => a.distance - b.distance);
   }
 }

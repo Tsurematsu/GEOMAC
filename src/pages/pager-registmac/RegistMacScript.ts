@@ -148,28 +148,39 @@ export default class RegistMacScript {
         }
     }
 
-    public static async registerMacToPoint(mac: string, pointId: string) {
+    public static async registerMacToPoint(mac: string, macName: string, pointId: string) {
+        const nameToSave = macName.trim() || 'Desconocido';
         const res = await fetch('/api/geomac', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'addMacAssociation', mac, puntoId: pointId })
+            body: JSON.stringify({ action: 'addMacAssociation', mac, macName: nameToSave, puntoId: pointId })
         });
         
         if (!res.ok) throw new Error('Error al guardar MAC en la base de datos');
 
-        if (!globalVar.macs.includes(mac)) {
-            globalVar.macs.push(mac);
+        const existingMac = globalVar.macs.find(m => m.mac === mac);
+        if (existingMac) {
+            existingMac.name = nameToSave;
+        } else {
+            globalVar.macs.push({ mac, name: nameToSave });
         }
+
         const existingAssoc = globalVar.associations.find(a => a.mac === mac && a.puntoId === pointId);
         if (!existingAssoc) {
             globalVar.associations.push({ mac, puntoId: pointId });
         }
     }
 
-    public static getMacsByPoint(pointId: string): string[] {
+    public static getMacsByPoint(pointId: string): {mac: string, name: string}[] {
         return globalVar.associations
             .filter(a => a.puntoId === pointId)
-            .map(a => a.mac);
+            .map(a => {
+                const macObj = globalVar.macs.find(m => m.mac === a.mac);
+                return {
+                    mac: a.mac,
+                    name: macObj ? macObj.name : 'Desconocido'
+                };
+            });
     }
 
     public static async removeMacFromPoint(mac: string, pointId: string) {

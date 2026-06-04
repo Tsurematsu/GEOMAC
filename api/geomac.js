@@ -16,7 +16,8 @@ async function initDB(sql) {
         `;
         await sql`
             CREATE TABLE IF NOT EXISTS macs (
-                mac VARCHAR(255) PRIMARY KEY
+                mac VARCHAR(255) PRIMARY KEY,
+                name VARCHAR(255)
             );
         `;
         await sql`
@@ -59,12 +60,12 @@ export default async function handler(req, res) {
 
         if (req.method === 'GET') {
             const puntosGPS = await sql`SELECT id, lat, lng, alt, name FROM puntos_gps`;
-            const macsRows = await sql`SELECT mac FROM macs`;
+            const macsRows = await sql`SELECT mac, name FROM macs`;
             const assocRows = await sql`SELECT mac, punto_id as "puntoId" FROM associations`;
             const configRows = await sql`SELECT value FROM config WHERE key = 'radiusDistance'`;
 
             const radiusDistance = configRows.length > 0 ? configRows[0].value : 15;
-            const macs = macsRows.map(row => row.mac);
+            const macs = macsRows.map(row => ({ mac: row.mac, name: row.name }));
 
             return res.status(200).json({
                 puntosGPS,
@@ -100,9 +101,9 @@ export default async function handler(req, res) {
 
                 case 'addMacAssociation':
                     await sql`
-                        INSERT INTO macs (mac)
-                        VALUES (${body.mac})
-                        ON CONFLICT (mac) DO NOTHING
+                        INSERT INTO macs (mac, name)
+                        VALUES (${body.mac}, ${body.macName || 'Desconocido'})
+                        ON CONFLICT (mac) DO UPDATE SET name = EXCLUDED.name
                     `;
                     await sql`
                         INSERT INTO associations (mac, punto_id)
