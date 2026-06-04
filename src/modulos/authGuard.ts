@@ -29,27 +29,20 @@ export function validateAccess(): boolean {
             throw new Error('La desencriptación resultó en una cadena vacía. Llave incorrecta o formato inválido.');
         }
 
-        let dynamicKey = null;
-
         // Intentar parsear como JSON si enviaron un objeto
         try {
             const data = JSON.parse(decryptedString);
-            if (data && data.dynamicKey) {
-                dynamicKey = data.dynamicKey;
+            if (data && data.canalAleatorio && data.claveSecretaDinamica) {
+                globalVar.canalAleatorio = data.canalAleatorio;
+                globalVar.claveSecretaDinamica = data.claveSecretaDinamica;
+                globalVar.isAuthorized = true;
+                console.log('✅ Autenticación exitosa. Variables dinámicas recuperadas.');
+                return true;
+            } else {
+                throw new Error("El JSON no tiene la estructura esperada.");
             }
         } catch (e) {
-            // Si no es un JSON, asumimos que pasaron la llave dinámica como un string de texto plano
-            dynamicKey = decryptedString;
-        }
-
-        // Guardar la llave dinámica para uso posterior con los sockets
-        if (dynamicKey) {
-            globalVar.dynamicSocketKey = dynamicKey;
-            globalVar.isAuthorized = true;
-            console.log('✅ Autenticación exitosa. Llave dinámica recuperada:', dynamicKey);
-            return true;
-        } else {
-            console.warn('Acceso denegado: El token desencriptado no contiene una llave válida.');
+            console.warn('Acceso denegado: El token desencriptado no contiene un JSON válido con canalAleatorio y claveSecretaDinamica.');
             globalVar.isAuthorized = false;
             return false;
         }

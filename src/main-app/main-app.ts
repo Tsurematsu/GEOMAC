@@ -6,6 +6,7 @@ import '../pages/pager-registmac/pager-registmac';
 import RegistMacScript from '../pages/pager-registmac/RegistMacScript';
 import { validateAccess } from '../modulos/authGuard';
 import globalVar from '../modulos/globalVar';
+import mqttClient from '../modulos/mqttClient';
 import '../components/qr-scanner/qr-scanner';
 
 @customElement('main-app')
@@ -26,6 +27,9 @@ export class MainApp extends LitElement {
         this.isAppLoading = false;
         return; // Detenemos la carga de la base de datos si no está autorizado
     }
+
+    // Inicializar la conexión en tiempo real con el backend de escritorio
+    mqttClient.init();
 
     try {
       console.log('🔄 Cargando datos desde NeonDB (/api/geomac)...');

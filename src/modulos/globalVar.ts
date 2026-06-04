@@ -12,7 +12,8 @@ interface GlobalVarType {
     associations: { mac: string; puntoId: string }[];
     radiusDistance: number;
     isAuthorized: boolean;
-    dynamicSocketKey: string | null;
+    canalAleatorio: string | null;
+    claveSecretaDinamica: string | null;
 }
 
 const globalVar: GlobalVarType = {
@@ -21,6 +22,7 @@ const globalVar: GlobalVarType = {
     associations: [],
     radiusDistance: 15,
     isAuthorized: false,
-    dynamicSocketKey: null
+    canalAleatorio: null,
+    claveSecretaDinamica: null
 }
 export default globalVar;
