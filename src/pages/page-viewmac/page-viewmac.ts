@@ -58,7 +58,7 @@ export class PageViewmac extends LitElement {
         ${this.loading ? html`
           <div class="status-card glass-panel loading">
             <div class="spinner"></div>
-            <p>Buscando en el radar (50m)...</p>
+            <p>Buscando en el radar (15m)...</p>
           </div>
         ` : this.errorMsg ? html`
           <div class="status-card glass-panel error">
