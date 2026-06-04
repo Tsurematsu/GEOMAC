@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import styles from './main-app.css?inline';
 import '../pages/page-viewmac/page-viewmac';
 import '../pages/pager-registmac/pager-registmac';
