@@ -9,6 +9,21 @@ export class MainApp extends LitElement {
   @state()
   private currentPage: 'home' | 'register' | 'view' = 'home';
 
+  async connectedCallback() {
+    super.connectedCallback();
+    try {
+      console.log('🔄 Probando conexión oculta a la API de Vercel/NeonDB (/api/geomac)...');
+      const response = await fetch('/api/geomac');
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('✅ Conexión a la DB exitosa. Datos iniciales recibidos:', data);
+    } catch (error) {
+      console.error('❌ Falló la prueba de conexión a la API:', error);
+    }
+  }
+
   render(): TemplateResult {
     return html`
       <div class="app-container">
