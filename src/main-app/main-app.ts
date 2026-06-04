@@ -19,13 +19,13 @@ export class MainApp extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    
+
     // Validar el acceso por URL de forma asíncrona (obtiene la llave de la DB primero)
     await validateAccess();
 
     if (!globalVar.isAuthorized) {
-        this.isAppLoading = false;
-        return; // Detenemos la carga de la base de datos si no está autorizado
+      this.isAppLoading = false;
+      return; // Detenemos la carga de la base de datos si no está autorizado
     }
 
     // Inicializar la conexión en tiempo real con el backend de escritorio
@@ -44,7 +44,7 @@ export class MainApp extends LitElement {
 
   render(): TemplateResult {
     if (this.isAppLoading) {
-        return html`
+      return html`
             <div class="app-container" style="display:flex; justify-content:center; align-items:center; height:100vh;">
                 <div class="spinner"></div>
             </div>
@@ -93,15 +93,15 @@ export class MainApp extends LitElement {
     if (!token) return;
 
     try {
-        // Si el QR contiene la URL completa (ej. https://.../?share-key=ABC)
-        // extraemos solo la llave para mantenernos en el dominio actual (útil para localhost)
-        const urlObj = new URL(token);
-        const extractedKey = urlObj.searchParams.get('share-key');
-        if (extractedKey) {
-            token = extractedKey;
-        }
+      // Si el QR contiene la URL completa (ej. https://.../?share-key=ABC)
+      // extraemos solo la llave para mantenernos en el dominio actual (útil para localhost)
+      const urlObj = new URL(token);
+      const extractedKey = urlObj.searchParams.get('share-key');
+      if (extractedKey) {
+        token = extractedKey;
+      }
     } catch (err) {
-        // Si falla el parseo de URL, asumimos que el QR era solo el token de texto plano
+      // Si falla el parseo de URL, asumimos que el QR era solo el token de texto plano
     }
 
     // Redirigir inyectando la llave en la URL actual
@@ -117,7 +117,7 @@ export class MainApp extends LitElement {
         
         <qr-scanner @qr-scanned=${this.handleQrScanned}></qr-scanner>
 
-        <a href="https://github.com/Tsurematsu/AUTOMAC" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: transparent; border: 1px solid var(--accent); color: var(--accent); text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; margin-top: 16px; width: 100%; justify-content: center; box-sizing: border-box;">
+        <a href="https://github.com/Tsurematsu/AUTOMAC/releases/tag/1.0.0" target="_blank" rel="noopener noreferrer" style="display: inline-block; background: transparent; border: 1px solid var(--accent); color: var(--accent); text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; margin-top: 16px; width: 100%; justify-content: center; box-sizing: border-box;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
             Visitar el Repositorio
         </a>
