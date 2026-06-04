@@ -7,6 +7,20 @@
   margin: 0 auto;
 }
 
+@media (min-width: 768px) {
+  .page-container {
+    max-width: 800px;
+  }
+  .points-list .list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .point-item {
+    margin: 0;
+  }
+}
+
 .header-section {
   text-align: center;
 }

@@ -125,3 +125,55 @@
   border: 1px solid var(--border);
   box-shadow: var(--glass-shadow);
 }
+
+/* Responsive Medium+ Screens */
+@media (min-width: 768px) {
+  .app-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+      "sidebar header"
+      "sidebar content";
+  }
+  
+  .app-header {
+    grid-area: header;
+    border-radius: 0;
+    margin-bottom: 0;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    text-align: left;
+    padding: 32px 40px 16px 40px;
+  }
+  
+  .bottom-nav {
+    grid-area: sidebar;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 40px;
+    gap: 16px;
+    border-radius: 0;
+    border-right: 1px solid var(--border);
+  }
+  
+  .nav-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 0 16px;
+    gap: 12px;
+  }
+  
+  .nav-btn span {
+    font-size: 16px;
+  }
+  
+  .app-content {
+    grid-area: content;
+    padding: 24px 40px;
+  }
+}
