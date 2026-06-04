@@ -1,4 +1,19 @@
-const globalVar = {
+export interface PuntoGPSData {
+    lat: number;
+    lng: number;
+    alt?: number;
+    name: string;
+    id: string;
+}
+
+interface GlobalVarType {
+    puntosGPS: PuntoGPSData[];
+    macs: string[];
+    associations: { mac: string; puntoId: string }[];
+    radiusDistance: number;
+}
+
+const globalVar: GlobalVarType = {
     puntosGPS: [],
     macs: [],
     associations: [],
