@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@vercel/postgres": "^0.10.0",
+    "crypto-js": "^4.2.0",
     "lit": "^3.3.2",
     "tesseract.js": "^7.0.0"
   },

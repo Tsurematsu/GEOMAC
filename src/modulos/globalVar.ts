@@ -11,12 +11,16 @@ interface GlobalVarType {
     macs: { mac: string; name: string }[];
     associations: { mac: string; puntoId: string }[];
     radiusDistance: number;
+    isAuthorized: boolean;
+    dynamicSocketKey: string | null;
 }
 
 const globalVar: GlobalVarType = {
     puntosGPS: [],
     macs: [],
     associations: [],
-    radiusDistance: 15
+    radiusDistance: 15,
+    isAuthorized: false,
+    dynamicSocketKey: null
 }
 export default globalVar;
