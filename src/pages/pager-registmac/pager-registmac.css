@@ -341,6 +341,7 @@
 .macs-list {
     list-style: none;
     padding: 0;
+    padding-bottom: 24px; /* Added extra space at the end of the list */
     display: flex;
     flex-direction: column;
     gap: 8px;
