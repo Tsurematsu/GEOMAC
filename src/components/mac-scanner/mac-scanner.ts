@@ -18,8 +18,7 @@ export class MacScanner extends LitElement {
 
     public start() {
         this.isScanning = true;
-        // Wait for next render so video element is in DOM
-        setTimeout(() => this.initScanner(), 0);
+        setTimeout(() => this.startCamera(), 0);
     }
 
     public stop() {
@@ -27,16 +26,32 @@ export class MacScanner extends LitElement {
         this.stopScanner();
     }
 
-    private async initScanner() {
-        this.statusMsg = 'Cargando motor OCR...';
-        try {
-            if (!this.worker) {
+    // Pre-carga el motor OCR en segundo plano al montar el componente
+    async connectedCallback() {
+        super.connectedCallback();
+        if (!this.worker) {
+            try {
                 this.worker = await Tesseract.createWorker('eng');
                 await this.worker.setParameters({
                     tessedit_char_whitelist: '0123456789ABCDEFabcdefO:- ',
                 });
+            } catch(e) {
+                console.error("Error preloading OCR", e);
             }
-            
+        }
+    }
+
+    private async startCamera() {
+        if (!this.worker) {
+            this.statusMsg = 'Inicializando motor OCR...';
+            // Fallback just in case connectedCallback didn't finish
+            this.worker = await Tesseract.createWorker('eng');
+            await this.worker.setParameters({
+                tessedit_char_whitelist: '0123456789ABCDEFabcdefO:- ',
+            });
+        }
+        
+        try {
             this.statusMsg = 'Accediendo a la cámara...';
             this.stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment' }
@@ -48,7 +63,8 @@ export class MacScanner extends LitElement {
             }
 
             this.statusMsg = 'Apunte la cámara a la dirección MAC';
-            this.scanInterval = setInterval(() => this.scanFrame(), 1500);
+            // Escanea 2 veces por segundo (soportable porque la imagen está recortada)
+            this.scanInterval = setInterval(() => this.scanFrame(), 500);
 
         } catch (err: any) {
             console.error(err);
@@ -77,10 +93,16 @@ export class MacScanner extends LitElement {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Draw current frame to hidden canvas
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // Recortar SOLO el centro de la imagen donde está el cuadro visual
+        // Esto reduce enormemente el área a procesar y multiplica la velocidad
+        const cropWidth = video.videoWidth * 0.8;
+        const cropHeight = 120; // Aproximadamente el alto del cuadro central
+        const startX = (video.videoWidth - cropWidth) / 2;
+        const startY = (video.videoHeight - cropHeight) / 2;
+
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
+        ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
         try {
             const { data: { text } } = await this.worker.recognize(canvas);
