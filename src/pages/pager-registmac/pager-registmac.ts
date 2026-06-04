@@ -2,6 +2,7 @@ import { LitElement, html, unsafeCSS, type TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import styles from './pager-registmac.css?inline';
 import RegistMacScript, { type PuntoGPS } from './RegistMacScript';
+import '../../components/mac-scanner/mac-scanner';
 
 @customElement('pager-registmac')
 export class PagerRegistmac extends LitElement {
@@ -90,6 +91,12 @@ export class PagerRegistmac extends LitElement {
     } else {
         this.associatedMacs = [];
     }
+  }
+
+  private handleMacScanned(e: CustomEvent) {
+    this.macInput = e.detail.mac;
+    // Auto-register upon successful scan for better UX
+    this.registerMac();
   }
 
   private handleMacInput(e: Event) {
@@ -221,6 +228,7 @@ export class PagerRegistmac extends LitElement {
               
               <div class="modal-body">
                   <div class="input-group">
+                    <mac-scanner @mac-scanned=${this.handleMacScanned}></mac-scanner>
                     <input 
                       type="text" 
                       placeholder="Ej. 00:1B:44:11:3A:B7" 

@@ -1,0 +1,116 @@
+.scanner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    height: 70vh;
+    overflow: hidden;
+    background: #000;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scan-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80px;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 4000px rgba(0,0,0,0.6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scan-line {
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+    position: absolute;
+    animation: scan 2s linear infinite;
+    box-shadow: 0 0 4px var(--accent);
+}
+
+@keyframes scan {
+    0% { top: 0; }
+    50% { top: 100%; }
+    100% { top: 0; }
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    width: 100%;
+}
+
+.status-text {
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+}
+
+.btn-close {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+}
+
+/* Inline scanner button (trigger) */
+.btn-scan {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-scan:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

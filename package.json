@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
-    "lit": "^3.3.2"
+    "lit": "^3.3.2",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "typescript": "~6.0.2",
