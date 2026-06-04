@@ -20,8 +20,8 @@ export class MainApp extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     
-    // Validar el acceso por URL antes de cargar la app
-    validateAccess();
+    // Validar el acceso por URL de forma asíncrona (obtiene la llave de la DB primero)
+    await validateAccess();
 
     if (!globalVar.isAuthorized) {
         this.isAppLoading = false;

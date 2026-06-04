@@ -31,13 +31,19 @@ async function initDB(sql) {
         await sql`
             CREATE TABLE IF NOT EXISTS config (
                 key VARCHAR(255) PRIMARY KEY,
-                value FLOAT NOT NULL
+                value VARCHAR(255) NOT NULL
             );
         `;
         
         await sql`
             INSERT INTO config (key, value)
-            VALUES ('radiusDistance', 15)
+            VALUES ('radiusDistance', '15')
+            ON CONFLICT (key) DO NOTHING;
+        `;
+
+        await sql`
+            INSERT INTO config (key, value)
+            VALUES ('static_secret_key', 'FJFDIOKKR45')
             ON CONFLICT (key) DO NOTHING;
         `;
         
@@ -59,12 +65,22 @@ export default async function handler(req, res) {
         await initDB(sql);
 
         if (req.method === 'GET') {
+            const urlParams = new URL(req.url, `http://${req.headers.host}`).searchParams;
+            if (urlParams.get('action') === 'get_config') {
+                const configRows = await sql`SELECT key, value FROM config`;
+                const configMap = {};
+                configRows.forEach(row => {
+                    configMap[row.key] = row.value;
+                });
+                return res.status(200).json({ config: configMap });
+            }
+
             const puntosGPS = await sql`SELECT id, lat, lng, alt, name FROM puntos_gps`;
             const macsRows = await sql`SELECT mac, name FROM macs`;
             const assocRows = await sql`SELECT mac, punto_id as "puntoId" FROM associations`;
             const configRows = await sql`SELECT value FROM config WHERE key = 'radiusDistance'`;
 
-            const radiusDistance = configRows.length > 0 ? configRows[0].value : 15;
+            const radiusDistance = configRows.length > 0 ? parseFloat(configRows[0].value) : 15;
             const macs = macsRows.map(row => ({ mac: row.mac, name: row.name }));
 
             return res.status(200).json({
