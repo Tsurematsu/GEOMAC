@@ -4,6 +4,7 @@ import styles from './page-viewmac.css?inline';
 import RegistMacScript, { type LocationData } from '../pager-registmac/RegistMacScript';
 import ViewMacScript, { type NearbyMac } from './ViewMacScript';
 import globalVar from '../../modulos/globalVar';
+import mqttClient from '../../modulos/mqttClient';
 
 @customElement('page-viewmac')
 export class PageViewmac extends LitElement {
@@ -18,6 +19,9 @@ export class PageViewmac extends LitElement {
 
   @state()
   private nearbyMacs: NearbyMac[] = [];
+
+  @state()
+  private selectedMacToApply: NearbyMac | null = null;
 
   private watchId: number = -1;
 
@@ -46,6 +50,18 @@ export class PageViewmac extends LitElement {
         this.loading = false;
       }
     );
+  }
+
+  private applySelectedMac() {
+    if (!this.selectedMacToApply) return;
+    
+    mqttClient.publicarMensaje({ macAddress: this.selectedMacToApply.mac });
+    
+    // Cerramos el modal
+    this.selectedMacToApply = null;
+    
+    // Opcional: mostrar un pequeño feedback
+    alert("¡Instrucción MQTT enviada! Revisa el escritorio.");
   }
 
   render(): TemplateResult {
@@ -107,7 +123,7 @@ export class PageViewmac extends LitElement {
                 <p>No hay MACs registradas en este radio de ${globalVar.radiusDistance}m.</p>
               </div>
             ` : this.nearbyMacs.map((item) => html`
-              <div class="mac-item glass-panel">
+              <div class="mac-item glass-panel" @click=${() => this.selectedMacToApply = item} style="cursor: pointer; transition: transform 0.2s ease;">
                 <div class="mac-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg>
                 </div>
@@ -120,6 +136,29 @@ export class PageViewmac extends LitElement {
             `)}
           </div>
         `}
+
+        ${this.selectedMacToApply ? html`
+            <div class="modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px;">
+                <div class="modal-card glass-panel" style="width: 100%; max-width: 400px; padding: 24px; text-align: center; border: 1px solid var(--accent);">
+                    <div style="background: var(--accent); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <h3 style="margin-bottom: 12px; font-size: 20px;">¿Aplicar esta MAC?</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">¿Deseas enviar la instrucción remota a tu escritorio para que aplique esta configuración de red?</p>
+                    
+                    <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+                        <strong style="color: var(--accent); display: block; font-size: 18px; margin-bottom: 4px;">${this.selectedMacToApply.macName}</strong>
+                        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px;">${this.selectedMacToApply.mac}</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn" style="flex: 1; background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary);" @click=${() => this.selectedMacToApply = null}>Cancelar</button>
+                        <button class="btn" style="flex: 1; background: var(--accent); border: none; color: white;" @click=${this.applySelectedMac}>Aplicar MAC</button>
+                    </div>
+                </div>
+            </div>
+        ` : ''}
+
       </div>
     `;
   }
