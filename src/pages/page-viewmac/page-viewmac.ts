@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import styles from './page-viewmac.css?inline';
 import RegistMacScript, { type LocationData } from '../pager-registmac/RegistMacScript';
 import ViewMacScript, { type NearbyMac } from './ViewMacScript';
+import globalVar from '../../modulos/globalVar';
 
 @customElement('page-viewmac')
 export class PageViewmac extends LitElement {
@@ -37,7 +38,7 @@ export class PageViewmac extends LitElement {
     this.watchId = RegistMacScript.watchGPS_point(
       (loc) => {
         this.location = loc;
-        this.nearbyMacs = ViewMacScript.getNearbyMacs(loc.lat, loc.lng, 15);
+        this.nearbyMacs = ViewMacScript.getNearbyMacs(loc.lat, loc.lng, globalVar.radiusDistance);
         this.loading = false;
       },
       (err) => {
@@ -52,13 +53,13 @@ export class PageViewmac extends LitElement {
       <div class="page-container fade-in">
         <div class="header-section">
           <h2>MACs Cercanas</h2>
-          <p>Direcciones MAC registradas a menos de 50 metros.</p>
+          <p>Direcciones MAC registradas a menos de ${globalVar.radiusDistance} metros.</p>
         </div>
 
         ${this.loading ? html`
           <div class="status-card glass-panel loading">
             <div class="spinner"></div>
-            <p>Buscando en el radar (15m)...</p>
+            <p>Buscando en el radar (${globalVar.radiusDistance}m)...</p>
           </div>
         ` : this.errorMsg ? html`
           <div class="status-card glass-panel error">
@@ -103,7 +104,7 @@ export class PageViewmac extends LitElement {
             ${this.nearbyMacs.length === 0 ? html`
               <div class="empty-state glass-panel">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                <p>No hay MACs registradas en este radio de 50m.</p>
+                <p>No hay MACs registradas en este radio de ${globalVar.radiusDistance}m.</p>
               </div>
             ` : this.nearbyMacs.map((item) => html`
               <div class="mac-item glass-panel">
