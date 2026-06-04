@@ -33,11 +33,11 @@ export class PageViewmac extends LitElement {
   private startWatching() {
     this.loading = true;
     this.errorMsg = null;
-    
+
     this.watchId = RegistMacScript.watchGPS_point(
       (loc) => {
         this.location = loc;
-        this.nearbyMacs = ViewMacScript.getNearbyMacs(loc.lat, loc.lng, 50);
+        this.nearbyMacs = ViewMacScript.getNearbyMacs(loc.lat, loc.lng, 15);
         this.loading = false;
       },
       (err) => {
